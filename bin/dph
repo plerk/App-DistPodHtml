@@ -1,0 +1,7 @@
+#!/usr/bin/perl
+use App::DistPodHtml;
+App::DistPodHtml->main(@ARGV);
+
+# PODNAME: dph
+# ABSTRACT: generate HTML for Perl dists
+# VERSION

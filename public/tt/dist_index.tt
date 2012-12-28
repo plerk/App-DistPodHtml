@@ -1,0 +1,28 @@
+[% WRAPPER wrapper.tt
+   title = dist.meta.name
+%]
+
+<p>[% dist.meta.abstract %]</p>
+
+<p>version: <strong>[% dist.meta.version %]</strong></p>
+
+
+<table class="table table-striped">
+  <thead>
+    <tr>
+      <th>Name</th>
+    <tr>
+  </thead>
+  <tbody>
+  [% FOREACH pod IN pods %]
+    <tr>
+      <td>
+        <a href="[% pod.url %]">[% pod.name %]</a></li>
+      </td>
+    </tr>
+  [% END %]
+  </tbody>
+</table>
+
+
+[% END %]

@@ -1,0 +1,26 @@
+[% WRAPPER wrapper.tt
+   title = pod.name
+%]
+
+<ul class="nav nav-tabs" id="perl_doc_tab">
+  <li class="active"><a href="#pod">Documentation</a></li>
+  <li><a href="#src">Source</a></li>
+</ul>
+
+<div class="tab-content">
+  <div class="tab-pane active" id="pod">
+    [% pod_html %]
+  </div>
+  <div class="tab-pane" id="src">
+    <pre class="sh_perl"><code>[% pl | html %]</code></pre>
+  </div>
+</div>
+
+<script>
+  $('#perl_doc_tab a').click(function(e) {
+    e.preventDefault();
+    $(this).tab('show');
+  })
+</script>
+
+[% END %]

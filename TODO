@@ -1,0 +1,5 @@
+. TOC up in the menu bar
+. link back to dist from pod page
+. description for each pod page on the dist_index
+. group pods into script, .pm and .pod
+. servable version (ie http://whatever insted of file://localhost)
