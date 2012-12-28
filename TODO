@@ -3,3 +3,6 @@
 . description for each pod page on the dist_index
 . group pods into script, .pm and .pod
 . servable version (ie http://whatever insted of file://localhost)
+. way to generate from a series of tarballs
+  - also generally more configurable
+. mojo/server mode
