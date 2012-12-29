@@ -6,23 +6,74 @@
 
 <p>version: <strong>[% dist.meta.version %]</strong></p>
 
+[% IF pods.pm %]
 
-<table class="table table-striped">
-  <thead>
-    <tr>
-      <th>Name</th>
-    <tr>
-  </thead>
-  <tbody>
-  [% FOREACH pod IN pods %]
-    <tr>
-      <td>
-        <a href="[% pod.url %]">[% pod.name %]</a></li>
-      </td>
-    </tr>
-  [% END %]
-  </tbody>
-</table>
+  <h3>Modules</h3>
+
+  <table class="table table-striped">
+    <thead>
+      <tr>
+        <th>Name</th>
+      <tr>
+    </thead>
+    <tbody>
+    [% FOREACH pod IN pods.pm %]
+      <tr>
+        <td>
+          <a href="[% pod.url %]">[% pod.name %]</a></li>
+        </td>
+      </tr>
+    [% END %]
+    </tbody>
+  </table>
+
+[% END %]
+
+[% IF pods.pl %]
+
+  <h3>Scripts</h3>
+
+  <table class="table table-striped">
+    <thead>
+      <tr>
+        <th>Name</th>
+      <tr>
+    </thead>
+    <tbody>
+    [% FOREACH pod IN pods.pl %]
+      <tr>
+        <td>
+          <a href="[% pod.url %]">[% pod.name %]</a></li>
+        </td>
+      </tr>
+    [% END %]
+    </tbody>
+  </table>
+
+[% END %]
+
+[% IF pods.pod %]
+
+  <h3>POD</h3>
+
+  <table class="table table-striped">
+    <thead>
+      <tr>
+        <th>Name</th>
+      <tr>
+    </thead>
+    <tbody>
+    [% FOREACH pod IN pods.pod %]
+      <tr>
+        <td>
+          <a href="[% pod.url %]">[% pod.name %]</a></li>
+        </td>
+      </tr>
+    [% END %]
+    </tbody>
+  </table>
+
+[% END %]
 
 
 [% END %]

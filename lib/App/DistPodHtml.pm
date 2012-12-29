@@ -12,6 +12,7 @@ use File::Copy qw( copy );
 use App::DistPodHtml::XHTML;
 use LWP::UserAgent;
 use YAML::XS qw( LoadFile DumpFile );
+use Getopt::Long qw( GetOptions );
 
 # ABSTRACT: Generate HTML of Perl POD
 # VERSION
@@ -23,17 +24,55 @@ my $ua = LWP::UserAgent->new;
 
 sub main
 {
-  my $dists = prune_dists(find_dists(dir(File::HomeDir->my_home, 'dev')));
-  my $pods  = index_dists($dists);
-  my $dest = dir(File::HomeDir->my_home, 'public_html');
+  my $dest;
 
   my $vars = { 
     description => 'Pod Documentation',
     author      => 'Unknown',
     favicon     => 'http://perl.com/favicon.ico',
     brand       => 'Perl Documentation',
-    home_url    => URI::file->new($dest->file('index.html')),
+    root_url    => '',
   };
+  
+  GetOptions(
+    "description=s" => \$vars->{description},
+    "favicon=s"     => \$vars->{favicon},
+    "brand=s"       => \$vars->{brand},
+    "root_url=s"    => \$vars->{root_url},
+    "dest|d=s"      => \$dest,
+  );
+  
+  if(defined $dest)
+  { $dest = dir($dest) }
+  else
+  { $dest = dir(File::HomeDir->my_home, 'public_html') }
+  
+  if($vars->{root_url})
+  {
+    if($vars->{root_url} =~ /^\//)
+    {
+      $vars->{root_url} = URI::file->new($vars->{root_url})
+    }
+    else
+    {
+      $vars->{root_url} = URI->new($vars->{root_url});
+    }
+  }
+  else
+  {
+    $vars->{root_url} = URI::file->new($dest);
+  }
+  
+  # FIXME option for when you don't need index.html
+  # FIXME option for when you don't need .html
+  $vars->{home_url} = $vars->{root_url}->clone;
+  $vars->{home_url}->path(
+    Path::Class::Dir->new_foreign('Unix', 
+      $vars->{root_url}->path)->file('index.html')->as_foreign('Unix')
+  );
+  
+  my $dists = prune_dists(find_dists(dir(File::HomeDir->my_home, 'dev')));
+  my $pods  = index_dists($dists);
   
   copy_support_files($dest, $vars);
   prep_output_tree($dest, $dists, $pods, $vars, $tt);
@@ -100,8 +139,11 @@ sub copy_support_files
     my $to = $dir->subdir($type);
     $to->mkpath(0,0755);
     copy($_, $to->file($_->basename)) foreach __PACKAGE__->share_dir->subdir($type)->children(no_hidden => 1);
-    # TODO when using file: urls maybe just point to the share_dir
-    $vars->{$type . '_url'} = URI::file->new($to);
+    $vars->{$type . '_url'} = $vars->{root_url}->clone;
+    $vars->{$type . '_url'}->path(
+      Path::Class::Dir->new_foreign('Unix', 
+        $vars->{root_url}->path)->subdir($type)->as_foreign('Unix')
+    );
   }
 }
 
@@ -117,21 +159,29 @@ sub prep_output_tree
     $dir->subdir($name)->mkpath(0,0755);
     push @{ $vars->{dists} }, { 
       name => $name, 
-      url  => URI::file->new($dir->file($name, 'index.html')),
+      url  => do {
+        my $url = $vars->{root_url}->clone;
+        $url->path(Path::Class::Dir->new_foreign('Unix', $url->path)->file($name, 'index.html')->as_foreign('Unix'));
+        $url;
+      },
       meta => $dist->{meta},
      };
 
-    local $vars->{pods} = [];
+    local $vars->{pods} = {};
     while(my($podname, $file) = each %{ $dist->{docs} })
     {
       my $html = $dir->file($name, "$podname.html");
-      my $url = URI::file->new($html);
-      push @{ $vars->{pods} }, { name => $podname, url => $url };
+      my $url = $vars->{root_url}->clone;
+      $url->path(Path::Class::Dir->new_foreign('Unix', $url->path)->file($name, "$podname.html")->as_foreign('Unix'));
+      $file->basename =~ /\.(pod|pm)$/;
+      my $suffix = $1 || 'pl';
+      push @{ $vars->{pods}->{$suffix} }, { name => $podname, url => $url };
       $pods->{$podname}->{url}  = $url;
       $pods->{$podname}->{html} = $html;
     }
 
-    @{ $vars->{pods} } = sort { lc $a->{name} cmp lc $b->{name} } @{ $vars->{pods} };
+    @{ $vars->{pods}->{$_} } = sort { lc $a->{name} cmp lc $b->{name} } @{ $vars->{pods}->{$_} }
+      for grep { defined $vars->{pods}->{$_} } qw( pl pm pod );
 
     local $vars->{dist} = $dist;
 
@@ -212,10 +262,10 @@ sub index_dists
   {
 
     my $add = sub {
-      my($podname, $file) = @_;
+      my($podname, $file, $type) = @_;
       die "duplicate for $podname: $file and " . $pod{$podname}->{file}
         if defined $pod{$podname};
-      $pod{$podname} = { dist => $dist, file => $file };
+      $pod{$podname} = { dist => $dist, file => $file, type => $type };
       $dist->{docs}->{$podname} = $file;
     };
 
@@ -224,7 +274,7 @@ sub index_dists
     {
       foreach my $script ($dir->subdir('bin')->children(no_hidden => 1))
       {
-        $add->($script->basename, $script);
+        $add->($script->basename, $script, 'pl');
       }
     }
     
@@ -236,7 +286,7 @@ sub index_dists
         if($child->is_dir)
         { $recurse->($child, @name, $child->basename) }
         elsif($child->basename =~ /^(.*)\.(pod|pm)$/)
-        { $add->(join('::', @name, $1), $child ) }
+        { $add->(join('::', @name, $1), $child, $2 ) }
       }
     };
     
