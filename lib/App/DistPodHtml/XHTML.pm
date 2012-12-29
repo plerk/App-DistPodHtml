@@ -5,6 +5,9 @@ use warnings;
 use v5.10;
 use base qw( Pod::Simple::XHTML );
 
+# ABSTRACT: generate XHTML/HTML from POD for DistPodHtml
+# VERSION
+
 sub new
 {
   my $class = shift;
