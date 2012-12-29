@@ -15,6 +15,7 @@ use YAML::XS qw( LoadFile DumpFile );
 use Getopt::Long qw( GetOptions );
 use Pod::Abstract;
 use File::Temp qw( tempdir );
+use File::ShareDir qw( dist_dir );
 
 # ABSTRACT: Generate HTML of Perl POD
 # VERSION
