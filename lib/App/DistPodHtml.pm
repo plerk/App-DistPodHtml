@@ -13,17 +13,19 @@ use App::DistPodHtml::XHTML;
 use LWP::UserAgent;
 use YAML::XS qw( LoadFile DumpFile );
 use Getopt::Long qw( GetOptions );
+use Pod::Abstract;
+use File::Temp qw( tempdir );
 
 # ABSTRACT: Generate HTML of Perl POD
 # VERSION
 
-my $tt = Template->new(
-  INCLUDE_PATH => __PACKAGE__->share_dir->subdir('tt'),
-);
-my $ua = LWP::UserAgent->new;
+my $tt  = Template->new( INCLUDE_PATH => __PACKAGE__->share_dir->subdir('tt') );
+my $ua  = LWP::UserAgent->new;
 
 sub main
 {
+  shift; # remove class
+  local @ARGV = @_;
   my $dest;
 
   my $vars = { 
@@ -71,7 +73,9 @@ sub main
       $vars->{root_url}->path)->file('index.html')->as_foreign('Unix')
   );
   
-  my $dists = prune_dists(find_dists(dir(File::HomeDir->my_home, 'dev')));
+  my $source = dir(shift @ARGV) // dir(File::HomeDir->my_home, 'dev');
+  
+  my $dists = prune_dists(find_dists($source));
   my $pods  = index_dists($dists);
   
   copy_support_files($dest, $vars);
@@ -175,7 +179,40 @@ sub prep_output_tree
       $url->path(Path::Class::Dir->new_foreign('Unix', $url->path)->file($name, "$podname.html")->as_foreign('Unix'));
       $file->basename =~ /\.(pod|pm)$/;
       my $suffix = $1 || 'pl';
-      push @{ $vars->{pods}->{$suffix} }, { name => $podname, url => $url };
+      my $abstract = '';
+      do {
+        my($pod) = Pod::Abstract->load_file($file->stringify)->select('/head1[=~ {NAME}]');
+        if(defined $pod)
+        {
+          $_->detach for $pod->select("//#cut");
+          ($pod) = $pod->children;
+          if(defined $pod) 
+          {
+            $pod = $pod->pod;
+            $pod =~ s/^\s+//;
+            $pod =~ s/\s+$//;
+            if($pod =~ /^(.*) - (.*)$/)
+            {
+              say STDERR "NAME section name does not match podname"
+                if $1 ne $podname;
+              $abstract = $2;
+            }
+            else
+            {
+              say STDERR "NAME section bad format for $podname";
+            }
+          }
+          else
+          {
+            say STDERR "no NAME for $podname";
+          }
+        }
+        else
+        {
+          say STDERR "no NAME for $podname";
+        }
+      };
+      push @{ $vars->{pods}->{$suffix} }, { name => $podname, url => $url, abstract => $abstract };
       $pods->{$podname}->{url}  = $url;
       $pods->{$podname}->{html} = $html;
     }
@@ -216,6 +253,26 @@ sub find_dists
     {
       push @list, @{ find_dists($subdir) };
     }
+    
+    foreach my $file (grep { $_->basename =~ /\.tar\.gz$/ } grep { ! $_->is_dir } $dir->children(no_hidden => 1))
+    {
+      my $tmp = dir(tempdir( CLEANUP => 1 ));
+      system "cd $tmp; tar zxf $file"; # FIXME do this from perl
+      my @children = $tmp->children;
+      if(@children != 1)
+      {
+        say STDERR "tarball $file does not contain exactly one directory in the root";
+        next;
+      }
+      my($dir) = @children;
+      unless(-e $dir->file('META.json'))
+      {
+        say STDERR "tarball $file does not contain a META.json file";
+        next;
+      }
+      push @list, { dir => $dir, meta => decode_json( $dir->file('META.json')->slurp ) };
+    }
+    
     return \@list;
   }
 }

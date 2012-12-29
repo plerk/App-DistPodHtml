@@ -14,6 +14,7 @@
     <thead>
       <tr>
         <th>Name</th>
+        <th>Abstract</th>
       <tr>
     </thead>
     <tbody>
@@ -21,6 +22,9 @@
       <tr>
         <td>
           <a href="[% pod.url %]">[% pod.name %]</a></li>
+        </td>
+        <td>
+          <a href="[% pod.url %]">[% pod.abstract %]</a></li>
         </td>
       </tr>
     [% END %]
@@ -37,6 +41,7 @@
     <thead>
       <tr>
         <th>Name</th>
+        <th>Abstract</th>
       <tr>
     </thead>
     <tbody>
@@ -44,6 +49,9 @@
       <tr>
         <td>
           <a href="[% pod.url %]">[% pod.name %]</a></li>
+        </td>
+        <td>
+          <a href="[% pod.url %]">[% pod.abstract %]</a></li>
         </td>
       </tr>
     [% END %]
@@ -60,6 +68,7 @@
     <thead>
       <tr>
         <th>Name</th>
+        <th>Abstract</th>
       <tr>
     </thead>
     <tbody>
@@ -67,6 +76,9 @@
       <tr>
         <td>
           <a href="[% pod.url %]">[% pod.name %]</a></li>
+        </td>
+        <td>
+          <a href="[% pod.url %]">[% pod.abstract %]</a></li>
         </td>
       </tr>
     [% END %]
