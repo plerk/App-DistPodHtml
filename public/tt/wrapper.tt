@@ -43,9 +43,26 @@
           </a>
           <a class="brand" href="[% home_url %]">[% brand %]</a>
           <div class="nav-collapse">
-            <ul class="nav">
-              <!-- FIXME: home, other buttons -->
-            </ul>
+            [% IF dist %]
+              <ul class="nav">
+                <li>
+                  <a href="[% dist.url %]">[% dist.meta.name %]</a>
+                </li>
+              </ul>
+              <ul class="nav">
+                <li>
+                  <a class="dropdown-toggle" id="drop1" role="button" data-toggle="dropdown" data-target="#" href="[% dist.url %]">
+                    Links
+                    <b class="caret"></b>
+                  </a>
+                  <ul class="dropdown-menu" role="menu" aria-labelledby="drop1">
+                    [% FOREACH resource IN dist.meta.resources %]
+                      <li><a tabindex="-1" href="[% resource.value.web %]">[% resource.key.ucfirst %]</a>
+                    [% END %]
+                  </ul>
+                </li>
+              </ul>
+            [% END %]
           </div><!--/.nav-collapse -->
         </div>
       </div>
@@ -54,7 +71,7 @@
   
     <div class="container">
       <h2>[% title %]</h2>
-
+      
       [% content %]
 
       <hr>

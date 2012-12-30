@@ -126,6 +126,7 @@ sub generate_html
     local $vars->{pod_html} = '';
     local $vars->{pod} = { name => $name, %$pod };
     local $vars->{pl} = $pod->{file}->slurp;
+    local $vars->{dist} = $pod->{dist};
     $psx->output_string(\$vars->{pod_html});
     $psx->parse_file($pod->{file}->stringify);
     $pod->{html}->spew(do {
@@ -167,6 +168,7 @@ sub prep_output_tree
       url  => do {
         my $url = $vars->{root_url}->clone;
         $url->path(Path::Class::Dir->new_foreign('Unix', $url->path)->file($name, 'index.html')->as_foreign('Unix'));
+        $dist->{url} = $url;
         $url;
       },
       meta => $dist->{meta},
@@ -221,10 +223,9 @@ sub prep_output_tree
     @{ $vars->{pods}->{$_} } = sort { lc $a->{name} cmp lc $b->{name} } @{ $vars->{pods}->{$_} }
       for grep { defined $vars->{pods}->{$_} } qw( pl pm pod );
 
-    local $vars->{dist} = $dist;
-
     $dir->file($name, 'index.html')->spew(do {
       my $html = '';
+      local $vars->{dist} = $dist;
       $tt->process('dist_index.tt', $vars, \$html) || die $tt->error;
       $html;
     });

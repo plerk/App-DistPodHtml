@@ -11,16 +11,16 @@
     <tr>
   </thead>
   <tbody>
-  [% FOREACH dist IN dists %]
+  [% FOREACH d IN dists %]
     <tr>
       <td>
-        <a href="[% dist.url %]">[% dist.name %]</a>
+        <a href="[% d.url %]">[% d.name %]</a>
       </td>
       <td>
-        <a href="[% dist.url %]">[% dist.meta.abstract %]</a>
+        <a href="[% d.url %]">[% d.meta.abstract %]</a>
       </td>
       <td>
-        <a href="[% dist.url %]">[% dist.meta.version %]</a>
+        <a href="[% d.url %]">[% d.meta.version %]</a>
       </td>
     </tr>
   [% END %]
