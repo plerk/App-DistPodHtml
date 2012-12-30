@@ -57,7 +57,8 @@
                   </a>
                   <ul class="dropdown-menu" role="menu" aria-labelledby="drop1">
                     [% FOREACH resource IN dist.meta.resources %]
-                      <li><a tabindex="-1" href="[% resource.value.web %]">[% resource.key.ucfirst %]</a>
+                      <li><a tabindex="-1" href="[% IF resource.value.web %][% resource.value.web %][% ELSE %][% resource.value %][% END %]">
+                        [% resource.key.ucfirst %]</a>
                     [% END %]
                   </ul>
                 </li>
