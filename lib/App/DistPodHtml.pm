@@ -194,7 +194,7 @@ sub prep_output_tree
             $pod = $pod->pod;
             $pod =~ s/^\s+//;
             $pod =~ s/\s+$//;
-            if($pod =~ /^(.*) - (.*)$/)
+            if($pod =~ /^(.*) --? (.*)$/)
             {
               say STDERR "NAME section name does not match podname"
                 if $1 ne $podname;
