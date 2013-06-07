@@ -207,12 +207,12 @@ sub prep_output_tree
           }
           else
           {
-            say STDERR "no NAME for $podname";
+            say STDERR "NAME for $podname missing";
           }
         }
         else
         {
-          say STDERR "no NAME for $podname";
+          say STDERR "NAME for $podname missing";
         }
       };
       push @{ $vars->{pods}->{$suffix} }, { name => $podname, url => $url, abstract => $abstract };

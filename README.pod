@@ -1,3 +1,5 @@
+=pod
+
 =head1 NAME
 
 App::DistPodHtml - Generate HTML of Perl POD
