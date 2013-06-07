@@ -6,7 +6,7 @@ App::DistPodHtml - Generate HTML of Perl POD
 
 =head1 VERSION
 
-version 0.03
+version 0.04
 
 =head1 AUTHOR
 
